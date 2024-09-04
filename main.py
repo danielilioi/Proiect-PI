@@ -17,6 +17,8 @@ def procesareFrame(frame, modelYolo):
     for *box, conf, cls in detectie:
         x1, y1, x2, y2 = int(box[0]), int(box[1]), int(box[2]), int(box[3])
         cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
+        label = f'{model.names[int(cls)]} {conf:.2f}'
+        cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
     return frame
 
 
@@ -87,13 +89,13 @@ def videoYolo(model, video_path, pathDeSalvare=None):
         rezultat.release()
     cv2.destroyAllWindows()
 
-
 def imagineYolo(model, patPtImagine, pathDeSalvare=None):
     frame = cv2.imread(patPtImagine)
     frame = procesareFrame(frame, model)
-    cv2.imshow('Detecții Imagine', frame)
     if pathDeSalvare:
         cv2.imwrite(pathDeSalvare, frame)
+    frame = cv2.resize(frame,(900,600))
+    cv2.imshow('Detecții Imagine', frame)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
@@ -116,8 +118,7 @@ def salvare(tip_fisier):
     elif tip_fisier == 'svo':
         path_de_salvare = filedialog.asksaveasfilename(defaultextension=".svo", filetypes=[("SVO files", "*.svo")])
     else:
-        path_de_salvare = filedialog.asksaveasfilename(defaultextension=".jpg",
-                                                 filetypes=[("JPG files", "*.jpg"), ("PNG files", "*.png")])
+        path_de_salvare = filedialog.asksaveasfilename(defaultextension=".jpg", filetypes=[("JPG files", "*.jpg"), ("PNG files", "*.png")])
     return path_de_salvare
 
 
@@ -132,6 +133,14 @@ if __name__ == "__main__":
 
     optiuneSalvare = simpledialog.askstring("Salvare", "Doriți să salvați rezultatele? (da/nu):").lower() == 'da'
     path_de_salvare = None
+    
+    if optiuneSalvare:
+        if alegere == '2':
+            path_de_salvare = salvare('video')
+        elif alegere == '3':
+            path_de_salvare = salvare('image')
+        elif alegere == '1':
+            path_de_salvare = salvare('svo')
 
     if alegere == '1':
         zedYolo(model, salvareBool=optiuneSalvare, pathSvoSalvare=path_de_salvare)
@@ -149,11 +158,3 @@ if __name__ == "__main__":
             print("Nu s-a selectat nicio imagine.")
     else:
         print("Opțiune invalidă!")
-
-    if optiuneSalvare:
-        if alegere == '2':
-            path_de_salvare = salvare('video')
-        elif alegere == '3':
-            path_de_salvare = salvare('image')
-        elif alegere == '1':
-            path_de_salvare = salvare('svo')
